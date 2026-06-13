@@ -110,6 +110,27 @@ body {
     0 0 16px rgba(0, 255, 136, 0.25);
 }
 
+/* faint preview of the step title shown next to an unvisited node */
+.node-label {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(125, 255, 178);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+/* once visited, the real section title takes over — hide the preview */
+.node.active .node-label {
+  opacity: 0;
+}
+
 /* ===== HANDLE ===== */
 .handle {
   position: absolute;
@@ -386,6 +407,12 @@ for (let i = 0; i < N; i++) {
   const node = document.createElement('div');
   node.className = 'node';
   node.style.top = nodeCenter(i) + 'px';
+
+  const label = document.createElement('div');
+  label.className = 'node-label';
+  label.textContent = steps[i].title;
+  node.appendChild(label);
+
   trackCol.insertBefore(node, handle);
   nodes.push(node);
 }

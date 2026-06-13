@@ -21,9 +21,15 @@ In the next section we will dive deeper into the specific steps.
 
 ## Pipeline
 
-### 1. Feature Extraction and Mapping
+### 1. Feature Extraction
 
-{{< include pages/01-features.qmd >}}
+{{< include pages/01-feature-extraction.qmd >}}
+
+---
+
+### 2. Feature Mapping
+
+{{< include pages/02-feature-mapping.qmd >}}
 
 ---
 
