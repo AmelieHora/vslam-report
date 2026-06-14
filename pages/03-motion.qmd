@@ -1,0 +1,12 @@
+With features matched between two frames, the next step recovers how the **camera itself moved**. The key idea is **epipolar geometry**: a point seen in one image must lie along a known line — its *epipolar line* — in the other image. This constraint is captured by a 3×3 matrix relating the two views.
+
+Which matrix depends on whether the camera is **calibrated**:
+
+- **Uncalibrated** → the **fundamental matrix F**, computable from pixel matches alone. It gives the epipolar lines, but only a projective reconstruction — no real motion.
+- **Calibrated** (intrinsics **K** known) → the **essential matrix E = Kᵀ F K**, which decomposes into the relative rotation **R** and translation direction **t** (scale is unobservable from a single camera).
+
+The explorer below works the way real SLAM does: it **estimates** the matrix from the visible point matches — the normalized **8-point algorithm** for F, then `E = KᵀFK` and an **SVD decomposition** (resolved by the cheirality check) to recover R and t. Drag a point in the left view to see its epipolar line in the right view; the faint lines converge at the **epipole** *e′*. Adjust the camera motion with the sliders, toggle **F** (uncalibrated) vs **E** (calibrated) — in E mode the recovered yaw and translation direction are shown next to the true values — and add **measurement noise** to watch the estimate degrade, exactly as it does with real, imperfect feature detections.
+
+```{=html}
+<iframe src="pages/html/epipolar.html" width="100%" height="720px" frameborder="0" scrolling="no"></iframe>
+```

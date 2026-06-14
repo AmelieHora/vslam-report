@@ -368,7 +368,7 @@ const svgs = [
 
 const steps = [
   { label: "Images",           title: "Image capture",            desc: "The camera captures a continuous stream of frames. Each frame is a 2D grid of pixel intensities — the raw input to the entire vSLAM pipeline." },
-  { label: "ORB features",     title: "ORB feature extraction",   desc: "Distinctive keypoints (corners, blobs) are detected and each is encoded as a compact binary descriptor. ORB is fast enough to run in real time on embedded hardware." },
+  { label: "ORB features",     title: "ORB feature detection",   desc: "Distinctive keypoints (corners, blobs) are detected and each is encoded as a compact binary descriptor. ORB is fast enough to run in real time on embedded hardware." },
   { label: "Feature matching", title: "Feature matching",         desc: "Descriptors from consecutive frames are compared by Hamming distance. Matched pairs identify the same real-world point seen from two positions. RANSAC removes outliers." },
   { label: "Camera motion",    title: "Camera motion estimation", desc: "From the matched pairs, the essential matrix is solved to recover the relative rotation R and translation t between frames — the camera's movement in space." },
   { label: "Triangulation",    title: "Triangulation",            desc: "Each matched pair defines two optical rays. Where they intersect gives the 3D position of that landmark. Depth is recovered without any active sensor." },

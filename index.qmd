@@ -21,24 +21,30 @@ In the next section we will dive deeper into the specific steps.
 
 ## Pipeline
 
-### 1. Feature Extraction
+### 1. Feature Detection
 
-{{< include pages/01-feature-extraction.qmd >}}
-
----
-
-### 2. Feature Mapping
-
-{{< include pages/02-feature-mapping.qmd >}}
+{{< include pages/01-feature-detection.qmd >}}
 
 ---
 
-{{< include pages/02-motion.qmd >}}
+### 2. Feature Matching
+
+{{< include pages/02-feature-matching.qmd >}}
 
 ---
 
-{{< include pages/03-triangulation.qmd >}}
+### 3. Camera Motion Estimation
+
+{{< include pages/03-motion.qmd >}}
 
 ---
 
-{{< include pages/04-pointcloud.qmd >}}
+### 4. Triangulation
+
+{{< include pages/04-triangulation.qmd >}}
+
+---
+
+### 5. Sparse Point Cloud Map
+
+{{< include pages/05-pointcloud.qmd >}}
