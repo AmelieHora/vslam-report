@@ -1,23 +1,22 @@
 ---
 title: "vSLAM"
-subtitle: "An interactive guide to Visual Simultaneous Location And Mapping"
-author: "Theodor Peifer, Amelie Hora, Japheth Legesse"
+subtitle: "An interactive guide to <i>Visual Simultaneous Location And Mapping</i>"
+author: "Theodor Peifer, Amelie Hora, Japheth Legesse<br/>Munich University of Applies Sciences"
 jupyter: python3
 bibliography: references.bib
 ---
 
 ## Abstract
-Visual SLAM (Simultaneous Localization and Mapping) is a computer vision technique that allows a camera to estimate its motion while simultaneously building a 3D map of an unknown environment. It works by detecting and tracking visual features across images, estimating camera movement between frames, and reconstructing scene structure from multiple views. VSLAM is widely used in robotics, augmented reality, and autonomous navigation as a lightweight alternative to depth sensors.
-
+Visual SLAM (Simultaneous Localization and Mapping) is a computer vision technique that allows a camera to estimate its motion while simultaneously building a 3D map of an unknown environment. It works by detecting and tracking visual features across images, estimating camera movement between frames and reconstructing scene structure from multiple views. VSLAM is widely used in robotics and autonomous navigation and relies only on a camera instead of depth sensors.
 
 ## Introduction
-Visual SLAM estimates camera motion and reconstructs a 3D map simultaneously. There are many different algorithms and approaches yet the general pipeline looks like this:
+There are many different algorithms and approaches yet the general pipeline looks like the following:
 
 ```{=html}
 <iframe src="pages/html/vslam_pipeline.html" width="100%" height="975px" frameborder="0" scrolling="no"></iframe>
 ```
 
-In the next section we will dive deeper into the specific steps.
+We focus on each step in turn, with interactive demos using OpenCV running directly in your browser.
 
 ## Pipeline
 

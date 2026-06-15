@@ -154,8 +154,6 @@
     <text x="749"  y="143">15</text><text x="771"  y="143">16</text>
   </g>
 
-
-
-  <text x="151" y="285" text-anchor="middle" font-size="12" fill="rgba(207,231,216,0.45)">FAST ring (r=3, 16 px) around p</text>
-  <text x="605" y="165" text-anchor="middle" font-size="12" fill="rgba(207,231,216,0.30)">ring unrolled clockwise</text>
+  <text x="151" y="290" text-anchor="middle" font-size="14" fill="rgba(207,231,216,0.45)">FAST ring (r=3, 16 px) around p</text>
+  <text x="605" y="165" text-anchor="middle" font-size="14" fill="rgba(207,231,216,0.45)">ring unrolled clockwise</text>
 </svg>

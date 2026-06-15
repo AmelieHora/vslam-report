@@ -212,7 +212,7 @@ async function start() {
   video.srcObject = stream;
   await video.play();
 
-  // fixed 4:3 panels (matches the stage aspect-ratio) — the feed is
+  // fixed 4:3 panels (matches the stage aspect-ratio) - the feed is
   // cover-cropped into them, never stretched.
   PROC_H  = Math.round(PROC_W * 3 / 4);
   RIGHT_X = PROC_W + GAP;
@@ -332,7 +332,7 @@ function loop() {
       prevReady = true;
     }
   } catch (e) {
-    // transient frame error — keep going
+    // transient frame error - keep going
   }
 
   kp.delete(); des.delete(); matches.delete();

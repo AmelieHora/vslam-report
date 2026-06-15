@@ -51,7 +51,7 @@ const clampi = x => Math.max(0, Math.min(PS-1, Math.round(x)));
 
 // fixed Gaussian sensor noise, shared by both images (so aligned patches still
 // match exactly). A descriptor deadband (MARGIN) keeps flat areas stable, so the
-// noise only flips a few near-tie bits as you drag/rotate — the match holds.
+// noise only flips a few near-tie bits as you drag/rotate - the match holds.
 const SIGMA = 5, MARGIN = 22;
 const noiseField = new Float32Array(PS*PS);
 for (let i=0; i<PS*PS; i++) noiseField[i] = randn() * SIGMA;
@@ -110,9 +110,11 @@ function bitRow(bits, diff, y, label) {
   const startX=90, endX=700, step=(endX-startX)/N, cw=step-2;
   ctx.fillStyle='rgba(207,231,216,0.6)'; ctx.font='11px IBM Plex Mono, monospace'; ctx.fillText(label, 14, y+12);
   for (let i=0;i<N;i++){ const x=startX+i*step;
-    if (diff[i]){ ctx.fillStyle='#ff6b6b'; ctx.fillRect(x,y,cw,15); }
-    else if (bits[i]){ ctx.fillStyle='#7dffb2'; ctx.fillRect(x,y,cw,15); }
-    else { ctx.strokeStyle='rgba(207,231,216,0.3)'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,cw-1,14); } }
+    // draw the bit's value: filled = 1, empty outline = 0
+    if (bits[i]){ ctx.fillStyle='#7dffb2'; ctx.fillRect(x,y,cw,15); }
+    else { ctx.strokeStyle='rgba(207,231,216,0.3)'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,cw-1,14); }
+    // mark a differing bit with a red outline (value stays visible underneath)
+    if (diff[i]){ ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,cw-2,13); } }
 }
 
 function render() {
@@ -146,7 +148,7 @@ function render() {
   bitRow(dL, diff, 252, 'left');
   bitRow(dR, diff, 284, 'right');
   ctx.fillStyle='rgba(207,231,216,0.5)'; ctx.font='10px IBM Plex Mono, monospace'; ctx.textAlign='center';
-  ctx.fillText('green = 1 · empty = 0 · red = differing bit', 360, 334); ctx.textAlign='left';
+  ctx.fillText('green = 1 · empty = 0 · red outline = differing bit', 360, 327); ctx.textAlign='left';
 }
 
 // ---- drag inside the patch = move the corner; outside = rotate ----

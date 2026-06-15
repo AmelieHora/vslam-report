@@ -74,7 +74,7 @@ input[type="range"]::-moz-range-thumb {
 <body>
 <div class="wrap">
   <canvas id="scene" width="624" height="248"></canvas>
-  <div class="hint">drag in the left view — the epipolar line in the right view comes from the <b>estimated</b> matrix</div>
+  <div class="hint">drag in the left view - the epipolar line in the right view comes from the <b>estimated</b> matrix</div>
 
   <div class="panel">
     <div class="matrix" id="matrix"></div>
@@ -399,7 +399,7 @@ function updatePanel() {
   const r = model.recovered;
   const rec = r
     ? `<span class="recovered">yaw ${r.yaw.toFixed(1)}°, t dir [${r.t.map(x=>x.toFixed(2)).join(', ')}]</span>`
-    : `<span class="recovered">(degenerate — adjust the scene)</span>`;
+    : `<span class="recovered">(degenerate - adjust the scene)</span>`;
   note.innerHTML =
     `<b>Essential matrix E</b>, <b>estimated</b> from the ${model.matches.length} point ` +
     `matches (normalized 8-point algorithm) and decomposed (SVD + cheirality) into the camera motion: ` +

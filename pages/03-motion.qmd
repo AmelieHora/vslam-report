@@ -23,7 +23,7 @@ Between frame **A** ($F_{t-1}$) and frame **B** ($F_t$) the camera has moved, an
 The scene below shows exactly that: the same camera at two positions, A and B. Drag to orbit, and move B with the sliders - the white arrow is **t** and the white arc is **R**, the two quantities we're after. The **×** on each image plane marks where the *same* feature point lands in each view - that's a matched pair from the previous step.
 
 ```{=html}
-<iframe src="pages/html/epipolar_3d.html" width="100%" height="740" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
+<iframe src="pages/html/epipolar_3d.html" width="100%" height="840" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
 ```
 
 #### Packing R and t into the essential matrix E

@@ -3,7 +3,7 @@
     text{font-family:'IBM Plex Mono',ui-monospace,monospace;}
     .ttl{fill:#7dffb2;font-size:13px;font-weight:600;letter-spacing:0.08em;}
     .cap{fill:#cfe7d8;font-size:12px;font-weight:600;letter-spacing:0.04em;}
-    .sub{fill:rgba(207,231,216,0.6);font-size:9.5px;}
+    .sub{fill:rgba(207,231,216,0.6);font-size:11px;}
     .ring{fill:rgba(207,231,216,0.18);}
     .arc{fill:#7dffb2;}
     .pix{fill:#cfe7d8;}
@@ -36,8 +36,8 @@
   <rect x="115" y="145" width="10" height="10" class="pix"/>
   <text x="120" size="9" y="135" text-anchor="middle" class="sub">p</text>
   <text x="120" y="252" size="12" text-anchor="middle" class="cap">1 · FAST</text>
-  <text x="120" y="270" size="11" text-anchor="middle" class="sub">≥ 9 contiguous ring</text>
-  <text x="120" y="282" size="11" text-anchor="middle" class="sub">pixels brighter/darker</text>
+  <text x="120" y="270" size="12" text-anchor="middle" class="sub">≥ 9 contiguous ring</text>
+  <text x="120" y="282" size="12" text-anchor="middle" class="sub">pixels brighter/darker</text>
 
   <path d="M178 150 L300 150" class="flow" marker-end="url(#a)"/>
 
