@@ -13,8 +13,10 @@ Each keypoint carries the 256-bit descriptor built in the previous step. Matchin
 
 The result is a set of point correspondences between the two frames. They're only *probable* — a final geometric check during **Camera Motion Estimation** (the next step) removes the matches that are inconsistent with a single camera motion.
 
-To get a feel for how a descriptor responds, grab the corner in the left patch below — drag near the centre to **move** it, or near the edge to **rotate** it. The two bit arrays update live and the bits that disagree light up red. When the corner is aligned with the reference the descriptors are identical, so when few enough bits differ (below a threshold) the two corners are accepted as the same point and linked with a line. Rotate it and watch the bits flip and the match break — a preview of why ORB *steers* its pattern by the keypoint orientation.
+To get a feel for what a descriptor actually responds to, the two images below each contain a corner plus a fixed circle peeking in from the top-left. **Drag the corner around** (drag *inside* the dashed circle to move it, *outside* to rotate it). The dashed circle is the **descriptor patch** — the only region the descriptor looks at. The bit rows update live, disagreeing bits turn red, and a line links the corners when they **match**.
+
+Because the descriptor is centred on the corner and rotation-invariant, you can **move and rotate it freely and it keeps matching** — as long as nothing else enters its patch. But drag the corner up toward the top-left circle: once part of that circle falls inside the patch, the local appearance changes, the bits flip, and the **match breaks**. That's the key idea — a descriptor describes a feature's *local neighbourhood*, so anything intruding on it (here a nearby object, in practice occlusion or clutter) can spoil the match.
 
 ```{=html}
-<iframe src="pages/html/descriptor_compare.html" width="100%" height="400" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
+<iframe src="pages/html/descriptor_compare.html" width="100%" height="500" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
 ```

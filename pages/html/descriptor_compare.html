@@ -5,281 +5,178 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  background: transparent;
-  color: #cfe7d8;
-  letter-spacing: 0.04em;
-}
+body { font-family: 'IBM Plex Mono', ui-monospace, monospace; background: transparent; color: #cfe7d8; letter-spacing: 0.04em; }
 .wrap { max-width: 720px; margin: 0 auto; padding: 1rem; }
-
 canvas#stage {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid rgba(0, 255, 136, 0.35);
-  border-radius: 8px;
-  background: #0b0f0e;
-  cursor: grab;
-  box-shadow: 0 0 18px rgba(0, 255, 136, 0.08);
+  display: block; width: 100%; height: auto;
+  border: 1px solid rgba(0,255,136,0.35); border-radius: 8px;
+  background: #0b0f0e; cursor: grab; box-shadow: 0 0 18px rgba(0,255,136,0.08);
 }
 canvas#stage:active { cursor: grabbing; }
-
-.hint {
-  text-align: center;
-  font-size: 11px;
-  color: rgba(207, 231, 216, 0.5);
-  margin-top: 0.5rem;
-  letter-spacing: 0.06em;
-}
-
-.params { margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.8rem; }
-.param label {
-  display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em;
-  text-transform: uppercase; color: rgba(207, 231, 216, 0.7); margin-bottom: 0.3rem;
-}
-.param label .val { color: #7dffb2; }
-input[type="range"] {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 2px; background: rgba(207, 231, 216, 0.25);
-  border-radius: 2px; outline: none; cursor: pointer;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%;
-  background: #0b0f0e; border: 1.5px solid #7dffb2; box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
-}
-input[type="range"]::-moz-range-thumb {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: #0b0f0e; border: 1.5px solid #7dffb2; box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
-}
+.hint { text-align: center; font-size: 11px; color: rgba(207,231,216,0.5); margin-top: 0.5rem; letter-spacing: 0.06em; }
+.controls { display: flex; justify-content: center; margin-top: 0.9rem; }
+.reset { font-family: inherit; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(207,231,216,0.6); background: transparent; border: 1px solid rgba(207,231,216,0.2); border-radius: 6px; padding: 0.55rem 0.9rem; cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <canvas id="stage" width="720" height="340"></canvas>
-  <div class="hint">drag the corner to move it · drag near the edge to rotate · align it to match</div>
+  <canvas id="stage" width="720" height="362"></canvas>
+  <div class="hint">drag the corner to move it · drag outside the patch circle to rotate · keep the circle out of the patch to stay matched</div>
+  <div class="controls"><button class="reset" id="reset">Reset</button></div>
 </div>
 
 <script>
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 
-const PS   = 64;          // patch sampling resolution
-const N    = 48;          // number of BRIEF tests (bits)
+const PS = 120, SIZE = 200, LX = 40, RX = 480, PY = 30;
+const SC = SIZE / PS;                 // display scale
+const PATCH_R = 22, N = 48, THRESH = 10;
+const DRAG_MIN = 0.25 * PS, DRAG_MAX = 0.75 * PS;   // limit how far the corner can be dragged
 const DARK = 60, LIGHT = 205;
+const CIRC = { x: 6, y: 6, r: 44 };   // fixed circle in the top-left (its lower-right quarter shows)
+const DEF = { x: 64, y: 74 };         // default corner position (patch is clean here)
 
-// patch placement on the canvas
-const SIZE = 170;
-const LX = 92,  RX = 458, PY = 30;     // left/right patch top-left
-const REF = { cx: PS / 2, cy: PS / 2, ang: 0 };  // reference corner: centred
+let cornerX = DEF.x, cornerY = DEF.y, angLeft = 0;
 
-// left (editable) corner position, in patch coords
-let cornerX = PS / 2, cornerY = PS / 2;
+// BRIEF pattern: 48 offset-pairs within the patch
+function randn(){ const u=Math.random(),v=Math.random(); return Math.sqrt(-2*Math.log(u+1e-9))*Math.cos(2*Math.PI*v); }
+function rOff(){ let x,y; do { x=randn()*PATCH_R*0.5; y=randn()*PATCH_R*0.5; } while (x*x+y*y > PATCH_R*PATCH_R); return [x,y]; }
+const PAIRS = Array.from({length:N}, () => ({ a:rOff(), b:rOff() }));
 
-// fixed BRIEF test pattern: 48 point pairs sampled around the patch centre
-function randn() {
-  const u = Math.random(), v = Math.random();
-  return Math.sqrt(-2 * Math.log(u + 1e-9)) * Math.cos(2 * Math.PI * v);
-}
-const clampi = (x) => Math.max(0, Math.min(PS - 1, Math.round(x)));
-const PAIRS = Array.from({ length: N }, () => ({
-  ax: clampi(PS / 2 + randn() * PS / 5), ay: clampi(PS / 2 + randn() * PS / 5),
-  bx: clampi(PS / 2 + randn() * PS / 5), by: clampi(PS / 2 + randn() * PS / 5),
-}));
+const off = document.createElement('canvas'); off.width=PS; off.height=PS;
+const octx = off.getContext('2d');
+const clampi = x => Math.max(0, Math.min(PS-1, Math.round(x)));
 
-// offscreen buffer used to scale each 64x64 patch up to the display size
-const off = document.createElement('canvas');
-off.width = PS; off.height = PS;
-const offCtx = off.getContext('2d');
-
-const noise = 5;          // fixed sensor-noise amplitude
-const MATCH_THRESHOLD = 8; // Hamming distance below this counts as a match
-let angLeft = 0;
-
-// ONE static noise field, generated once and shared by both patches — so when
-// the corners are aligned the patches are pixel-identical (zero differing bits).
-// Only dragging/rotating the left corner creates a real difference.
-const noiseField = Float32Array.from({ length: PS * PS }, () => Math.random() * 2 - 1);
-
-// build a noisy grayscale patch with a single corner at (cx,cy), rotated by ang
-function makePatch(cx, cy, ang, field) {
-  const g = new Uint8ClampedArray(PS * PS);
+// the scene: a dark object whose corner is the feature (at cx,cy, rotated by ang)
+// + the fixed top-left circle. Returns a grayscale buffer.
+function makeScene(cx, cy, ang) {
+  const g = new Uint8ClampedArray(PS*PS);
   const c = Math.cos(ang), s = Math.sin(ang);
-  for (let y = 0; y < PS; y++) {
-    for (let x = 0; x < PS; x++) {
-      const dx = x - cx, dy = y - cy;
-      const rx = dx * c + dy * s;
-      const ry = -dx * s + dy * c;
-      const base = (rx > 0 && ry > 0) ? DARK : LIGHT;   // one 90° corner
-      g[y * PS + x] = base + field[y * PS + x] * noise;
-    }
+  for (let y=0; y<PS; y++) for (let x=0; x<PS; x++) {
+    const dx=x-cx, dy=y-cy;
+    const rx = dx*c + dy*s, ry = -dx*s + dy*c;
+    let dark = (rx>0 && ry>0);                                  // the corner (90° wedge)
+    const ex=x-CIRC.x, ey=y-CIRC.y;
+    if (ex*ex+ey*ey <= CIRC.r*CIRC.r) dark = true;             // the fixed circle
+    g[y*PS+x] = dark ? DARK : LIGHT;
   }
   return g;
 }
+const gray = (g,x,y) => g[clampi(y)*PS + clampi(x)];
 
-function drawPatch(g, dx, dy) {
-  const img = offCtx.createImageData(PS, PS);
-  for (let i = 0; i < PS * PS; i++) {
-    const v = g[i];
-    img.data[i * 4] = v; img.data[i * 4 + 1] = v; img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255;
-  }
-  offCtx.putImageData(img, 0, 0);
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(off, 0, 0, PS, PS, dx, dy, SIZE, SIZE);
-  ctx.strokeStyle = 'rgba(0,255,136,0.4)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(dx + 0.5, dy + 0.5, SIZE - 1, SIZE - 1);
+// orientation (intensity centroid) → makes the descriptor rotation invariant
+function orientation(g, cx, cy) {
+  let m10=0, m01=0;
+  for (let dy=-PATCH_R; dy<=PATCH_R; dy++) for (let dx=-PATCH_R; dx<=PATCH_R; dx++)
+    if (dx*dx+dy*dy <= PATCH_R*PATCH_R) { const I=gray(g,cx+dx,cy+dy); m10+=dx*I; m01+=dy*I; }
+  return Math.atan2(m01, m10);
 }
-
-const sample = (g, x, y) => g[clampi(y) * PS + clampi(x)];
-function descriptor(g) {
-  const bits = new Uint8Array(N);
-  for (let i = 0; i < N; i++) {
-    const p = PAIRS[i];
-    bits[i] = sample(g, p.ax, p.ay) < sample(g, p.bx, p.by) ? 1 : 0;
+function descriptor(g, cx, cy, theta) {
+  const c=Math.cos(theta), s=Math.sin(theta), bits=new Uint8Array(N);
+  for (let i=0;i<N;i++){
+    const p=PAIRS[i];
+    const ax=p.a[0]*c-p.a[1]*s, ay=p.a[0]*s+p.a[1]*c;
+    const bx=p.b[0]*c-p.b[1]*s, by=p.b[0]*s+p.b[1]*c;
+    bits[i] = gray(g,cx+ax,cy+ay) < gray(g,cx+bx,cy+by) ? 1 : 0;
   }
   return bits;
 }
 
+function drawScene(g, dx, dy) {
+  const img = octx.createImageData(PS, PS);
+  for (let i=0;i<PS*PS;i++){ const v=g[i]; img.data[i*4]=v; img.data[i*4+1]=v; img.data[i*4+2]=v; img.data[i*4+3]=255; }
+  octx.putImageData(img,0,0);
+  ctx.imageSmoothingEnabled=false; ctx.drawImage(off, 0,0,PS,PS, dx,dy,SIZE,SIZE);
+  ctx.strokeStyle='rgba(0,255,136,0.35)'; ctx.lineWidth=1; ctx.strokeRect(dx+0.5,dy+0.5,SIZE-1,SIZE-1);
+}
+function patchUI(cx, cy) {
+  ctx.strokeStyle='#7dffb2'; ctx.lineWidth=2.5; ctx.setLineDash([6,4]);
+  ctx.shadowColor='rgba(0,255,136,0.5)'; ctx.shadowBlur=5;
+  ctx.beginPath(); ctx.arc(cx, cy, PATCH_R*SC, 0, 7); ctx.stroke();
+  ctx.shadowBlur=0; ctx.setLineDash([]);
+  ctx.fillStyle='#7dffb2'; ctx.beginPath(); ctx.arc(cx,cy,3.5,0,7); ctx.fill();
+}
 function bitRow(bits, diff, y, label) {
-  const startX = 120, endX = 700, step = (endX - startX) / N, cw = step - 2;
-  ctx.fillStyle = 'rgba(207,231,216,0.6)';
-  ctx.font = '11px IBM Plex Mono, monospace';
-  ctx.fillText(label, 20, y + 12);
-  for (let i = 0; i < N; i++) {
-    const x = startX + i * step;
-    if (diff[i]) {
-      ctx.fillStyle = '#ff6b6b';
-      ctx.fillRect(x, y, cw, 16);
-    } else if (bits[i]) {
-      ctx.fillStyle = '#7dffb2';
-      ctx.fillRect(x, y, cw, 16);
-    } else {
-      ctx.strokeStyle = 'rgba(207,231,216,0.3)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x + 0.5, y + 0.5, cw - 1, 15);
-    }
-  }
+  const startX=90, endX=700, step=(endX-startX)/N, cw=step-2;
+  ctx.fillStyle='rgba(207,231,216,0.6)'; ctx.font='11px IBM Plex Mono, monospace'; ctx.fillText(label, 14, y+12);
+  for (let i=0;i<N;i++){ const x=startX+i*step;
+    if (diff[i]){ ctx.fillStyle='#ff6b6b'; ctx.fillRect(x,y,cw,15); }
+    else if (bits[i]){ ctx.fillStyle='#7dffb2'; ctx.fillRect(x,y,cw,15); }
+    else { ctx.strokeStyle='rgba(207,231,216,0.3)'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,cw-1,14); } }
 }
 
 function render() {
-  const gL = makePatch(cornerX, cornerY, angLeft, noiseField);
-  const gR = makePatch(REF.cx, REF.cy, REF.ang, noiseField);
-  const dL = descriptor(gL), dR = descriptor(gR);
-  const diff = new Uint8Array(N);
-  let ham = 0;
-  for (let i = 0; i < N; i++) { diff[i] = dL[i] ^ dR[i]; ham += diff[i]; }
+  const gL = makeScene(cornerX, cornerY, angLeft);
+  const gR = makeScene(DEF.x, DEF.y, 0);
+  const thL = orientation(gL, cornerX, cornerY), thR = orientation(gR, DEF.x, DEF.y);
+  const dL = descriptor(gL, cornerX, cornerY, thL), dR = descriptor(gR, DEF.x, DEF.y, thR);
+  const diff = new Uint8Array(N); let ham=0;
+  for (let i=0;i<N;i++){ diff[i]=dL[i]^dR[i]; ham+=diff[i]; }
+  const matched = ham < THRESH;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='rgba(207,231,216,0.6)'; ctx.font='11px IBM Plex Mono, monospace';
+  ctx.fillText('left image  (drag the corner)', LX, PY-7);
+  ctx.fillText('reference', RX, PY-7);
+  drawScene(gL, LX, PY); drawScene(gR, RX, PY);
 
-  // labels + patches
-  ctx.fillStyle = 'rgba(207,231,216,0.6)';
-  ctx.font = '11px IBM Plex Mono, monospace';
-  ctx.fillText('shifted patch  (drag)', LX, PY - 8);
-  ctx.fillText('reference', RX, PY - 8);
-  drawPatch(gL, LX, PY);
-  drawPatch(gR, RX, PY);
+  const cL = { x: LX+cornerX*SC, y: PY+cornerY*SC };
+  const cR = { x: RX+DEF.x*SC, y: PY+DEF.y*SC };
+  patchUI(cL.x, cL.y); patchUI(cR.x, cR.y);
 
-  // corner positions in display coordinates
-  const lcx = LX + cornerX / PS * SIZE, lcy = PY + cornerY / PS * SIZE;
-  const rcx = RX + REF.cx / PS * SIZE,  rcy = PY + REF.cy / PS * SIZE;
-  const matched = ham < MATCH_THRESHOLD;
-
-  // interaction guide ring on the left patch: inside = move, outside = rotate
-  ctx.strokeStyle = 'rgba(125,255,178,0.55)';
-  ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(pcx, pcy, INNER_R, 0, 7); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // marker on the draggable corner
-  ctx.fillStyle = '#7dffb2';
-  ctx.beginPath(); ctx.arc(lcx, lcy, 3, 0, 7); ctx.fill();
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(lcx, lcy, 5, 0, 7); ctx.stroke();
-
-  // if the descriptors are close enough, the two corners are the same point:
-  // draw a connecting line to mark the match
   if (matched) {
-    ctx.strokeStyle = '#7dffb2';
-    ctx.lineWidth = 2;
-    ctx.shadowColor = 'rgba(0,255,136,0.5)';
-    ctx.shadowBlur = 6;
-    ctx.beginPath();
-    ctx.moveTo(lcx, lcy);
-    ctx.lineTo(rcx, rcy);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#7dffb2';
-    ctx.beginPath(); ctx.arc(lcx, lcy, 3, 0, 7); ctx.fill();
-    ctx.beginPath(); ctx.arc(rcx, rcy, 3, 0, 7); ctx.fill();
+    ctx.strokeStyle='#7dffb2'; ctx.lineWidth=2; ctx.shadowColor='rgba(0,255,136,0.5)'; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.moveTo(cL.x,cL.y); ctx.lineTo(cR.x,cR.y); ctx.stroke(); ctx.shadowBlur=0;
   }
+  ctx.textAlign='center'; ctx.font='13px IBM Plex Mono, monospace';
+  ctx.fillStyle = matched ? '#7dffb2' : 'rgba(255,107,107,0.9)';
+  ctx.fillText(matched ? 'MATCH' : 'NO MATCH', 360, PY+SIZE/2+4);
+  ctx.textAlign='left';
 
-  ctx.textAlign = 'center';
-  ctx.font = '13px IBM Plex Mono, monospace';
-  ctx.fillStyle = matched ? '#7dffb2' : 'rgba(255,107,107,0.85)';
-  ctx.fillText(matched ? 'MATCH' : 'NO MATCH', 360, PY - 8);
-  ctx.textAlign = 'left';
+  // caption: what the bit rows mean
+  ctx.fillStyle='rgba(207,231,216,0.75)'; ctx.font='11px IBM Plex Mono, monospace'; ctx.textAlign='center';
+  ctx.fillText('the bit rows are the two descriptors — how alike the areas inside the two green circles are', 360, 250);
+  ctx.textAlign='left';
 
-  // descriptor bit rows
-  bitRow(dL, diff, 238, 'shifted');
-  bitRow(dR, diff, 272, 'reference');
-
-  // legend
-  ctx.fillStyle = 'rgba(207,231,216,0.5)';
-  ctx.font = '10px IBM Plex Mono, monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('green = 1   ·   outline = 0   ·   red = differing bit', 410, 320);
-  ctx.textAlign = 'left';
+  bitRow(dL, diff, 268, 'left');
+  bitRow(dR, diff, 300, 'ref');
+  ctx.fillStyle='rgba(207,231,216,0.5)'; ctx.font='10px IBM Plex Mono, monospace'; ctx.textAlign='center';
+  ctx.fillText('green = 1 · empty = 0 · red = differing bit', 360, 350); ctx.textAlign='left';
 }
 
-// drag the left patch directly: near the centre → move the corner,
-// near the outer edge → rotate it. The threshold radius is INNER_R.
-const INNER_R = SIZE * 0.30;
-let drag = null; // { mode: 'move' | 'rotate', lastAng }
-
-function canvasPoint(e) {
-  const r = canvas.getBoundingClientRect();
-  const sx = canvas.width / r.width, sy = canvas.height / r.height;
-  return {
-    mx: ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) * sx,
-    my: ((e.touches ? e.touches[0].clientY : e.clientY) - r.top) * sy,
-  };
-}
-const pcx = LX + SIZE / 2, pcy = PY + SIZE / 2;  // left-patch centre (display)
-function setCorner(mx, my) {
-  cornerX = Math.max(8, Math.min(PS - 8, (mx - LX) / SIZE * PS));
-  cornerY = Math.max(8, Math.min(PS - 8, (my - PY) / SIZE * PS));
-}
-function startDrag(e) {
-  const { mx, my } = canvasPoint(e);
-  if (mx < LX || mx > LX + SIZE || my < PY || my > PY + SIZE) return false;
-  if (Math.hypot(mx - pcx, my - pcy) < INNER_R) {
-    drag = { mode: 'move' };
-    setCorner(mx, my);
-  } else {
-    drag = { mode: 'rotate', lastAng: Math.atan2(my - pcy, mx - pcx) };
-  }
+// ---- drag inside the patch = move the corner; outside = rotate ----
+let drag=null, lastAng=0;
+function toImg(e){ const r=canvas.getBoundingClientRect();
+  return { mx:((e.touches?e.touches[0].clientX:e.clientX)-r.left)*canvas.width/r.width,
+           my:((e.touches?e.touches[0].clientY:e.clientY)-r.top)*canvas.height/r.height }; }
+function start(e){
+  const {mx,my}=toImg(e);
+  if (mx<LX||mx>LX+SIZE||my<PY||my>PY+SIZE) return false;
+  const cx=LX+cornerX*SC, cy=PY+cornerY*SC;
+  if (Math.hypot(mx-cx,my-cy) < PATCH_R*SC) { drag='move'; setCorner(mx,my); }
+  else { drag='rot'; lastAng=Math.atan2(my-cy,mx-cx); }
   return true;
 }
-function moveDrag(e) {
-  if (!drag) return;
-  const { mx, my } = canvasPoint(e);
-  if (drag.mode === 'move') {
-    setCorner(mx, my);
-  } else {
-    const a = Math.atan2(my - pcy, mx - pcx);
-    angLeft += a - drag.lastAng;
-    drag.lastAng = a;
-  }
+function setCorner(mx,my){
+  cornerX = Math.max(DRAG_MIN, Math.min(DRAG_MAX, (mx-LX)/SC));
+  cornerY = Math.max(DRAG_MIN, Math.min(DRAG_MAX, (my-PY)/SC));
+}
+function move(e){
+  if(!drag) return;
+  const {mx,my}=toImg(e);
+  if (drag==='move') setCorner(mx,my);
+  else { const cx=LX+cornerX*SC, cy=PY+cornerY*SC, a=Math.atan2(my-cy,mx-cx); angLeft+=a-lastAng; lastAng=a; }
   render();
 }
-canvas.addEventListener('mousedown', e => { if (startDrag(e)) render(); });
-canvas.addEventListener('mousemove', moveDrag);
-window.addEventListener('mouseup', () => drag = null);
-canvas.addEventListener('touchstart', e => { if (startDrag(e)) { e.preventDefault(); render(); } }, { passive: false });
-canvas.addEventListener('touchmove', e => { if (drag) { moveDrag(e); e.preventDefault(); } }, { passive: false });
-window.addEventListener('touchend', () => drag = null);
+canvas.addEventListener('mousedown', e=>{ if(start(e)) render(); });
+canvas.addEventListener('mousemove', move);
+window.addEventListener('mouseup', ()=>drag=null);
+canvas.addEventListener('touchstart', e=>{ if(start(e)){ e.preventDefault(); render(); } }, {passive:false});
+canvas.addEventListener('touchmove', e=>{ if(drag){ move(e); e.preventDefault(); } }, {passive:false});
+window.addEventListener('touchend', ()=>drag=null);
+
+document.getElementById('reset').addEventListener('click', ()=>{ cornerX=DEF.x; cornerY=DEF.y; angLeft=0; render(); });
 
 render();
 </script>
