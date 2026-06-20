@@ -54,5 +54,5 @@
   <text x="562" y="269" text-anchor="middle" class="lbl">Level 3</text>
 
   <!-- ── caption ── -->
-  <text x="321" y="314" text-anchor="middle" class="cap">constant window size · image shrinks per level → scale invariance</text>
+  <text x="321" y="314" text-anchor="middle" class="cap">image shrinks per level → scale invariance</text>
 </svg>
