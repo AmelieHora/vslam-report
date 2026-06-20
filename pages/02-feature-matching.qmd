@@ -1,15 +1,37 @@
-Once features are extracted, they have to be **matched** across frames - finding the same real-world point seen from two different camera positions. Below, the left panel is your live camera and the right panel is a frame from a moment ago; lines link the keypoints ORB matched between them. Move the camera slowly to see the correspondences shift.
+Once features are detected, they have to be **matched** across frames - locating the same real-world point seen from two different camera positions.
+
+Below, the left panel is your live camera and the right is a frame from a moment ago; the lines link the keypoints ORB matched between them. Move the camera (or something it captures) slowly to watch it connect corresponding feature points.
 
 ```{=html}
-<iframe src="pages/html/orb_matching.html" width="100%" height="370" frameborder="0" scrolling="no" allow="camera" style="display:block;border:0;"></iframe>
+<div class="demo-frame">
+<iframe src="pages/html/orb_matching.html" width="100%" height="370" frameborder="0" scrolling="no" allow="camera" loading="lazy" onload="this.nextElementSibling.style.display='none'"></iframe>
+<div class="demo-loading"><div class="demo-spinner"></div>loading OpenCV…</div>
+</div>
 ```
 
 #### How it works
 
-Each keypoint carries the 256-bit descriptor from the previous step. Matching asks: for a descriptor in frame $F_t$, **which descriptor in the earlier frame $F_{t-1}$ is most similar?** Similarity is the **Hamming distance** - the number of differing bits (a fast XOR + bit-count) - and each descriptor is paired with its nearest neighbour. A few cheap filters (a distance threshold, a cross-check) throw out the unreliable pairs, leaving a set of *probable* correspondences. The next step, **Camera Motion Estimation**, makes the final call on which ones are geometrically consistent.
+Every keypoint carries its 256-bit descriptor (as described in the previous section). To match one from frame $F_t$, we look for the **most similar** descriptor in the previous frame $F_{t-1}$.
 
-To see what a descriptor actually responds to, the two images below each hold a corner plus a fixed circle in the top-left. **Drag the corner** to move it (*inside* the dashed circle), or *outside* to rotate. The dashed circle is the **descriptor patch** - the only region that's compared. Because the descriptor is centred on the corner and rotation-invariant, it keeps matching as you move and rotate it - until you drag it near the circle: once that intrudes on the patch, the bits flip and the **match breaks**.
+For binary strings, "similar" means a small **Hamming distance** - the number of bits that differ:
+
+$$
+d_H(a, b) = \sum_{i=1}^{256} a_i \oplus b_i
+$$
+
+In short, it uses **XOR** and a bit count, which are very cheap and quick instructions on the CPU. Each descriptor is then paired with its **nearest neighbour**, the one with the smallest $d_H$.
+
+The nearest neighbour can still be wrong, so weak matches are filtered out by doing a **cross-check**: the pair must agree both ways ($A\!\to\!B$ and $B\!\to\!A$).
+
+#### Visual explanation
+
+The two images below each hold a corner and a fixed circle. **Drag the corner** to move it, or drag *outside* the dashed circle to rotate it.
+
+That dashed circle is the **descriptor patch** - the only region compared.^[The patch is a $31\times31$ *square*, but only the inscribed **circle** is effectively used - rotating the sampling pattern keeps the same pixels only for a circular region, which is why the demo draws a circle.] Since the descriptor is centred on the corner and rotation-invariant, the match holds as you move and rotate it - until you drag it near the circle. Once that intrudes on the patch, the bits flip and the **match breaks**.
 
 ```{=html}
-<iframe src="pages/html/descriptor_compare.html" width="100%" height="400" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
+<div class="demo-frame">
+<iframe src="pages/html/descriptor_compare.html" width="100%" height="400" frameborder="0" scrolling="no" loading="lazy" onload="this.nextElementSibling.style.display='none'"></iframe>
+<div class="demo-loading"><div class="demo-spinner"></div>loading…</div>
+</div>
 ```

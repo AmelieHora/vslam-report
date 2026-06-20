@@ -1,0 +1,55 @@
+<svg viewBox="0 0 560 176" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  </style>
+
+  <!-- red connectors at the differing columns (behind the cells) -->
+  <g stroke="#e63030" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7">
+    <line x1="124.5" y1="40" x2="124.5" y2="125"/>
+    <line x1="190.5" y1="40" x2="190.5" y2="125"/>
+    <line x1="278.5" y1="40" x2="278.5" y2="125"/>
+  </g>
+
+  <!-- cell outlines for all three rows (a: y=40, b: y=66, XOR: y=104) -->
+  <g fill="rgba(207,231,216,0.05)" stroke="rgba(207,231,216,0.12)" stroke-width="0.6">
+    <rect x="70" y="40" width="21" height="21"/><rect x="92" y="40" width="21" height="21"/><rect x="114" y="40" width="21" height="21"/><rect x="136" y="40" width="21" height="21"/><rect x="158" y="40" width="21" height="21"/><rect x="180" y="40" width="21" height="21"/><rect x="202" y="40" width="21" height="21"/><rect x="224" y="40" width="21" height="21"/><rect x="246" y="40" width="21" height="21"/><rect x="268" y="40" width="21" height="21"/><rect x="290" y="40" width="21" height="21"/><rect x="312" y="40" width="21" height="21"/><rect x="334" y="40" width="21" height="21"/><rect x="356" y="40" width="21" height="21"/><rect x="378" y="40" width="21" height="21"/><rect x="400" y="40" width="21" height="21"/>
+    <rect x="70" y="66" width="21" height="21"/><rect x="92" y="66" width="21" height="21"/><rect x="114" y="66" width="21" height="21"/><rect x="136" y="66" width="21" height="21"/><rect x="158" y="66" width="21" height="21"/><rect x="180" y="66" width="21" height="21"/><rect x="202" y="66" width="21" height="21"/><rect x="224" y="66" width="21" height="21"/><rect x="246" y="66" width="21" height="21"/><rect x="268" y="66" width="21" height="21"/><rect x="290" y="66" width="21" height="21"/><rect x="312" y="66" width="21" height="21"/><rect x="334" y="66" width="21" height="21"/><rect x="356" y="66" width="21" height="21"/><rect x="378" y="66" width="21" height="21"/><rect x="400" y="66" width="21" height="21"/>
+    <rect x="70" y="104" width="21" height="21"/><rect x="92" y="104" width="21" height="21"/><rect x="114" y="104" width="21" height="21"/><rect x="136" y="104" width="21" height="21"/><rect x="158" y="104" width="21" height="21"/><rect x="180" y="104" width="21" height="21"/><rect x="202" y="104" width="21" height="21"/><rect x="224" y="104" width="21" height="21"/><rect x="246" y="104" width="21" height="21"/><rect x="268" y="104" width="21" height="21"/><rect x="290" y="104" width="21" height="21"/><rect x="312" y="104" width="21" height="21"/><rect x="334" y="104" width="21" height="21"/><rect x="356" y="104" width="21" height="21"/><rect x="378" y="104" width="21" height="21"/><rect x="400" y="104" width="21" height="21"/>
+  </g>
+
+  <!-- descriptor a: faint green where bit = 1 -->
+  <g fill="rgba(125,255,178,0.16)">
+    <rect x="70" y="40" width="21" height="21"/><rect x="114" y="40" width="21" height="21"/><rect x="136" y="40" width="21" height="21"/><rect x="202" y="40" width="21" height="21"/><rect x="246" y="40" width="21" height="21"/><rect x="268" y="40" width="21" height="21"/><rect x="312" y="40" width="21" height="21"/><rect x="378" y="40" width="21" height="21"/><rect x="400" y="40" width="21" height="21"/>
+  </g>
+
+  <!-- descriptor b: faint green where bit = 1 -->
+  <g fill="rgba(125,255,178,0.16)">
+    <rect x="70" y="66" width="21" height="21"/><rect x="136" y="66" width="21" height="21"/><rect x="180" y="66" width="21" height="21"/><rect x="202" y="66" width="21" height="21"/><rect x="246" y="66" width="21" height="21"/><rect x="312" y="66" width="21" height="21"/><rect x="378" y="66" width="21" height="21"/><rect x="400" y="66" width="21" height="21"/>
+  </g>
+
+  <!-- XOR: red where a and b differ -->
+  <g fill="rgba(230,48,48,0.4)" stroke="#e63030" stroke-width="1.5">
+    <rect x="114" y="104" width="21" height="21"/><rect x="180" y="104" width="21" height="21"/><rect x="268" y="104" width="21" height="21"/>
+  </g>
+
+  <!-- bit values in every cell -->
+  <g text-anchor="middle" font-size="11" fill="rgba(207,231,216,0.85)">
+    <!-- a -->
+    <text x="80.5" y="54">1</text><text x="102.5" y="54">0</text><text x="124.5" y="54">1</text><text x="146.5" y="54">1</text><text x="168.5" y="54">0</text><text x="190.5" y="54">0</text><text x="212.5" y="54">1</text><text x="234.5" y="54">0</text><text x="256.5" y="54">1</text><text x="278.5" y="54">1</text><text x="300.5" y="54">0</text><text x="322.5" y="54">1</text><text x="344.5" y="54">0</text><text x="366.5" y="54">0</text><text x="388.5" y="54">1</text><text x="410.5" y="54">1</text>
+    <!-- b -->
+    <text x="80.5" y="80">1</text><text x="102.5" y="80">0</text><text x="124.5" y="80">0</text><text x="146.5" y="80">1</text><text x="168.5" y="80">0</text><text x="190.5" y="80">1</text><text x="212.5" y="80">1</text><text x="234.5" y="80">0</text><text x="256.5" y="80">1</text><text x="278.5" y="80">0</text><text x="300.5" y="80">0</text><text x="322.5" y="80">1</text><text x="344.5" y="80">0</text><text x="366.5" y="80">0</text><text x="388.5" y="80">1</text><text x="410.5" y="80">1</text>
+    <!-- xor -->
+    <text x="80.5" y="118">0</text><text x="102.5" y="118">0</text><text x="124.5" y="118">1</text><text x="146.5" y="118">0</text><text x="168.5" y="118">0</text><text x="190.5" y="118">1</text><text x="212.5" y="118">0</text><text x="234.5" y="118">0</text><text x="256.5" y="118">0</text><text x="278.5" y="118">1</text><text x="300.5" y="118">0</text><text x="322.5" y="118">0</text><text x="344.5" y="118">0</text><text x="366.5" y="118">0</text><text x="388.5" y="118">0</text><text x="410.5" y="118">0</text>
+  </g>
+
+  <!-- row labels -->
+  <g text-anchor="end" font-size="13" fill="#cfe7d8">
+    <text x="60" y="55">a</text>
+    <text x="60" y="81">b</text>
+    <text x="62" y="119">XOR</text>
+  </g>
+
+  <!-- note + caption -->
+  <text x="421" y="20" text-anchor="end" font-size="10" fill="rgba(207,231,216,0.4)">showing 16 of 256 bits</text>
+  <text x="245" y="158" text-anchor="middle" font-size="16" fill="rgba(207,231,216,0.6)">3 bits differ &#8594; d<tspan font-size="11" dy="3">H</tspan><tspan dy="-3">(a, b) = 3</tspan></text>
+</svg>
