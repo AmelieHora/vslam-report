@@ -3,5 +3,8 @@ Triangulation gives 3D points from *one* pair of frames. A real sequence has hun
 Play the sequence below to watch it form: the camera moves along its path (green trail), and each step adds freshly triangulated points (green) to the growing cloud (blue). Drag to orbit the finished map.
 
 ```{=html}
-<iframe src="pages/html/pointcloud.html" width="100%" height="700" frameborder="0" scrolling="no" style="display:block;border:0;"></iframe>
+<div class="demo-frame">
+<iframe src="pages/html/pointcloud.html" width="100%" height="625" frameborder="0" scrolling="no" loading="lazy" onload="this.nextElementSibling.style.display='none'"></iframe>
+<div class="demo-loading"><div class="demo-spinner"></div>loading…</div>
+</div>
 ```
